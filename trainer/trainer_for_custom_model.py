@@ -136,6 +136,7 @@ def start_training(optimizer,model,pos_weigh,train_loader,val_loader,ep,device,m
             print("patience_counter: ",patience_counter," epoch:",epoch)
             if patience_counter >= patience:
                 print(f"\nEarly stopping triggered at epoch {epoch}! ",m_path)
+                break
 
 
 def get_class_weights(class_sizes, mean_class,clip_min):
