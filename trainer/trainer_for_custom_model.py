@@ -78,16 +78,16 @@ def start_training(optimizer,model,pos_weigh,train_loader,val_loader,ep,device,m
                 # torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
                 optimizer.step()
             
+            
             #batch_count+= input_ids.size(0)
             batch_count = batch_idx
             sample_count = cmap.shape[0]+sample_count
 
             print(f"train Epoch {epoch}, batchidx, {batch_idx}, batch count: {batch_count} ,Loss: {loss.item()}, port_ids_count, {len(train_prot_ids)}, sample count, {sample_count}")
-            
-            # if batch_idx == 0:  # Just check first few batches
-            #     break
 
-        print(total_loss," : training total loss batch_count: ", batch_count," prot count", len(train_prot_ids))
+
+
+    
         training_avg_loss = total_loss / (batch_count+1)
 
         print("Validation") 
@@ -118,9 +118,9 @@ def start_training(optimizer,model,pos_weigh,train_loader,val_loader,ep,device,m
                 val_loss += loss.item() 
                 batch_count = batch_idx
                 print(f"val - Epoch {epoch}, batchidx, {batch_idx}, batch count: {batch_count} ,Loss: {loss.item()}, port_ids, {len(val_prot_ids)}, Sample Count, {sample_count}")
-        
+
         avg_val_loss = val_loss / (batch_count+1)
-        print(val_loss," : validation total loss batch_count: ", batch_count," port count ", len(val_prot_ids))
+       
         
         # --- DeepFRI-style Early Stopping ---
         print(f"Epoch {epoch+1}/{epoch} | Train Loss: {training_avg_loss:.4f} | Val Loss: {avg_val_loss:.4f}")
@@ -136,11 +136,11 @@ def start_training(optimizer,model,pos_weigh,train_loader,val_loader,ep,device,m
             print("patience_counter: ",patience_counter," epoch:",epoch)
             if patience_counter >= patience:
                 print(f"\nEarly stopping triggered at epoch {epoch}! ",m_path)
-                break
 
 
 def get_class_weights(class_sizes, mean_class,clip_min):
-  
+   
+    # Negligible value is added to the denominator to prevent undefined value
     pos_weights = mean_class /class_sizes +1e-18
     
     # Clip weights to avoid extreme values (between 1 and 10)
@@ -160,30 +160,26 @@ if __name__ =='__main__':
     parser.add_argument('-e', '--epochs', type=int, default=200, help="Number of epochs to train.")
     parser.add_argument('-pd', '--pad_len', type=int, default = 1002, help="Padd length (max len of protein sequences in train set).")
     parser.add_argument('-ont', '--ontology', type=str, default='mf', choices=['mf', 'bp', 'cc', 'ec'], help="Ontology.")
-    parser.add_argument( '--extra_layer', type=str,  choices=['cnn','cmap','cnn_bias','cmap_bias','cmap_cnn_bias_alpha','cnn_mul_alpha','cnn_bias_per_head_alpha','cnn_mul_per_head_alpha','cmap_bias_per_head_alpha_no_cnn','no_cnn_mul_per_head_alpha','basic'], help="Do you want to add a new layer to your model?")
-    parser.add_argument('--fasta_seq', type=str, default='/mmfs1/home/mdtahmid.islam/nrPDB-GO_2019.06.18_sequences.fasta',  help="sequence_path")
-    parser.add_argument('--output_directory', type=str, default='/mmfs1/home/mdtahmid.islam/deepfri_bert/all_models',  help="model_saving_directory")
+    parser.add_argument( '--extra_layer', type=str,default='cmap_bias',  choices=['cmap_bias','basic'], help="Extra Layer to imporve the performance")
+    parser.add_argument('--output_directory', type=str, default='/mmfs1/projects/changhui.yan/mdtahmid.islam/ProtCmapBERT_Refined/ProtCmapBERT/all_models',  help="model_saving_directory")
     parser.add_argument('--tokenizer_path', type=str,  help="tokenizer_path")
     parser.add_argument('--pretrained_model_name', type=str, default='Rostlab/prot_bert',  help="Pretrained Model Name")
-    parser.add_argument('--drop_out_rate',type=float,default=1e-1)
+    parser.add_argument('--drop_out_rate',type=float,default=0.01)
     parser.add_argument('--clip_min',type=float,default=1.0)
+    parser.add_argument('--fasta_seq', type=str,default="/mmfs1/projects/changhui.yan/mdtahmid.islam/ProtCmapBERT_Refined/ProtCmapBERT/data/nrPDB-EC_2020.04_sequences.fasta",  help="sequence_path")
+    parser.add_argument('--training_ds_directory',default='/mmfs1/projects/changhui.yan/mdtahmid.islam/ProtCmapBERT_Refined/ProtCmapBERT/training_ds/PDB-EC', type=str,  help="training DS directory path")
+    parser.add_argument('--annotation_path', type=str, default='/mmfs1/projects/changhui.yan/mdtahmid.islam/ProtCmapBERT_Refined/ProtCmapBERT/data/nrPDB-EC_2020.04_annot.tsv',  help="path to annotation file")
+    parser.add_argument('--file_pattern_train', type=str, default='PDB_EC_train_*.tfrecords')
+    parser.add_argument('--file_pattern_valid', type=str, default='PDB_EC_valid_*.tfrecords')
     args = parser.parse_args()
     if args.ontology == 'ec':
-        prot2annot, goterms, gonames, counts = load_EC_annot("/mmfs1/home/mdtahmid.islam/deepfri_bert/preprocessing/data/nrPDB-EC_2020.04_annot.tsv")
-        args.directory = '/mmfs1/home/mdtahmid.islam/EC_Files/PDB-EC'
-        args.fasta_seq = '/mmfs1/home/mdtahmid.islam/deepfri_bert/preprocessing/data/nrPDB-EC_2020.04_sequences.fasta'
-        args.file_pattern_train = 'PDB_EC_train_*.tfrecords'
-        args.file_pattern_valid = 'PDB_EC_valid_*.tfrecords'
-        
+        prot2annot, goterms, gonames, counts = load_EC_annot(args.annotation_path)
     else:
-        prot2annot, goterms, gonames, counts = load_GO_annot("/mmfs1/home/mdtahmid.islam/deepfri_bert/preprocessing/data/nrPDB-GO_2019.06.18_annot.tsv")
-        args.directory = '/mmfs1/home/mdtahmid.islam/pdb_files'
-        args.file_pattern_train = "PDB_GO_train_*.tfrecords"
-        args.file_pattern_valid = "PDB_GO_valid_*.tfrecords"
+        prot2annot, goterms, gonames, counts = load_GO_annot(args.annotation_path)
+        
     goterms = goterms[args.ontology]
     gonames = gonames[args.ontology]
     args.output_dim = len(goterms)
-    print(f"Sample Count = {len(prot2annot)} \n Args: {args}")
 
     # computing weights for imbalanced selected lable classes
     
@@ -200,8 +196,8 @@ if __name__ =='__main__':
     #load device
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     #define data loader
-    train_loader = get_data_loader(device,args.file_pattern_train,tokenizer,args.ontology,args.fasta_seq,args.directory,args.pad_len)
-    valid_loader =  get_data_loader(device,args.file_pattern_valid,tokenizer,args.ontology,args.fasta_seq,args.directory,args.pad_len)
+    train_loader = get_data_loader(device,args.file_pattern_train,tokenizer,args.ontology,args.fasta_seq,args.training_ds_directory,args.pad_len)
+    valid_loader =  get_data_loader(device,args.file_pattern_valid,tokenizer,args.ontology,args.fasta_seq,args.training_ds_directory,args.pad_len)
 
     #define encoder
     model = get_custom_prot_model_instance(args)
@@ -209,10 +205,8 @@ if __name__ =='__main__':
     model.to(device)
     optimizer = AdamW(model.parameters(), lr=args.lr)
 
-    m_path = f'{args.output_directory}/custom_trained_model/dr_01_{args.ontology}_lr_{args.lr}_{args.extra_layer}_{args.pad_len}_again_clipping_{int(args.clip_min)}_.pt'
-    if args.extra_layer == 'basic':
-        m_path = f'{args.output_directory}/{args.pretrained_model_name}_{args.ontology}_lr_{args.lr}_clip_{int(args.clip_min)}_.pt'
-    print(m_path," before strating")
+    m_path = f'{args.output_directory}/custom_trained_model/{args.ontology}_lr_{args.lr}_{args.extra_layer}_{args.pad_len}.pt'
+    print(f'Model path = {m_path}')
 
     start_training(
         optimizer,
