@@ -10,7 +10,7 @@ from .custom_self_attention import *
 class CustomModel_With_Modified_Attention(BertModel):
     def __init__(self, config: BertConfig):
         super().__init__(config)
-        print(" CUSTOM MODEL BIAS")
+        print(" CUSTOM BIAS MODEL")
         for layer in self.encoder.layer:
             old_self_attn = layer.attention.self
             new_self_attn = SelfAttentionWithContact(config)

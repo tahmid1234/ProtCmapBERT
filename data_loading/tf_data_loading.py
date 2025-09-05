@@ -10,8 +10,6 @@ import functools
 sys.path.append(os.path.abspath(os.path.join(__file__, "..","..")))
 from helper.fasta import read_fasta
 
-#fasta_sequences = read_fasta('/mmfs1/home/mdtahmid.islam/nrPDB-GO_2019.06.18_sequences.fasta')
-#ec_fasta_sequence = read_fasta('/mmfs1/home/mdtahmid.islam/deepfri_bert/preprocessing/data/nrPDB-EC_2020.04_sequences.fasta')
 # --- Configuration ---
 BATCH_SIZE = 16
 DISTANCE_THRESHOLD = 10.0

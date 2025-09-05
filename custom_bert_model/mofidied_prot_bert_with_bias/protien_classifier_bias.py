@@ -17,7 +17,7 @@ def get_pooling(output,pooling="first"):
 class ProtienClassifierBias(nn.Module):
     def __init__(self, pretrained_model_name,args):
         super(ProtienClassifierBias, self).__init__()
-        print(f"Protien Classifier Biass WITHOUT CNN dropout rate = {args.drop_out_rate}")
+        print(f"Protien Classifier: Cmap as a Bias ")
         config = BertConfig.from_pretrained(pretrained_model_name)
         config.attention_probs_dropout_prob = args.drop_out_rate
         config.hidden_dropout_prob = args.drop_out_rate    

@@ -10,7 +10,7 @@ class SelfAttentionWithContact(BertSelfAttention):
         super().__init__(config)
         # We are using a scalar alpha learnable parameter to influence our cmap as a bias.
         # Initialize to 0 so it doesn't disrupt pre-trained weights initially.
-        print("BIAS Per Head")
+        print("learnable parameter")
         self.cmap_alpha_per_head = nn.Parameter(torch.zeros(self.num_attention_heads))
 
 
