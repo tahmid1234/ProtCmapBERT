@@ -157,26 +157,29 @@ def get_class_weights(class_sizes, mean_class,clip_min):
 
 if __name__ =='__main__':
     parser = argparse.ArgumentParser(formatter_class = argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument('--lr', type=float, default=5e-6, help="learning_rate.")
+    parser.add_argument('--lr', type=float, default=7e-6, help="learning_rate.")
     parser.add_argument('-e', '--epochs', type=int, default=200, help="Number of epochs to train.")
     parser.add_argument('-pd', '--pad_len', type=int, default = 1002, help="Padd length (max len of protein sequences in train set).")
     parser.add_argument('-ont', '--ontology', type=str, default='mf', choices=['mf', 'bp', 'cc', 'ec'], help="Ontology.")
-    parser.add_argument( '--extra_layer', type=str,default='cmap_bias',  choices=['cmap_bias','basic'], help="Extra Layer to imporve the performance")
-    parser.add_argument('--output_directory', type=str, default='/mmfs1/projects/changhui.yan/mdtahmid.islam/ProtCmapBERT_Refined/ProtCmapBERT/all_models',  help="model_saving_directory")
+    parser.add_argument( '--extra_layer', type=str,default='cmap_bias',  choices=['cmap_bias','basic'], help="cmap_bias for contact map integrated attention Prot Bert and basic for generat Prot Bert")
+    parser.add_argument('--output_directory', type=str, default='all_models',  help="model_saving_directory")
     parser.add_argument('--tokenizer_path', type=str,  help="tokenizer_path")
     parser.add_argument('--pretrained_model_name', type=str, default='Rostlab/prot_bert',  help="Pretrained Model Name")
     parser.add_argument('--drop_out_rate',type=float,default=0.01)
     parser.add_argument('--clip_min',type=float,default=1.0)
-    parser.add_argument('--fasta_seq', type=str,default="/mmfs1/projects/changhui.yan/mdtahmid.islam/ProtCmapBERT_Refined/ProtCmapBERT/data/nrPDB-EC_2020.04_sequences.fasta",  help="sequence_path")
-    parser.add_argument('--training_ds_directory',default='/mmfs1/projects/changhui.yan/mdtahmid.islam/ProtCmapBERT_Refined/ProtCmapBERT/training_ds/PDB-EC', type=str,  help="training DS directory path")
-    parser.add_argument('--annotation_path', type=str, default='/mmfs1/projects/changhui.yan/mdtahmid.islam/ProtCmapBERT_Refined/ProtCmapBERT/data/nrPDB-EC_2020.04_annot.tsv',  help="path to annotation file")
+    parser.add_argument('--training_ds_directory',default='training_ds/PDB-EC', type=str,  help="training DS directory path")
     parser.add_argument('--file_pattern_train', type=str, default='PDB_EC_train_*.tfrecords')
     parser.add_argument('--file_pattern_valid', type=str, default='PDB_EC_valid_*.tfrecords')
     args = parser.parse_args()
     if args.ontology == 'ec':
-        prot2annot, goterms, gonames, counts = load_EC_annot(args.annotation_path)
+        annotation_path = "data/nrPDB-EC_2020.04_annot.tsv"
+        args.fasta_seq = "data/nrPDB-EC_2020.04_sequences.fasta"
+        prot2annot, goterms, gonames, counts = load_EC_annot(annotation_path)
+        
     else:
-        prot2annot, goterms, gonames, counts = load_GO_annot(args.annotation_path)
+        annotation_path = "data/nrPDB-GO_2019.06.18_annot.tsv"
+        args.fasta_seq = "data/nrPDB-GO_2019.06.18_sequences.fasta"
+        prot2annot, goterms, gonames, counts = load_GO_annot(annotation_path)
         
     goterms = goterms[args.ontology]
     gonames = gonames[args.ontology]
@@ -205,8 +208,9 @@ if __name__ =='__main__':
     model,gpu_count = wrap_the_model(model)
     model.to(device)
     optimizer = AdamW(model.parameters(), lr=args.lr)
-
-    m_path = f'{args.output_directory}/custom_trained_model/{args.ontology}_lr_{args.lr}_{args.extra_layer}_{args.pad_len}.pt'
+    args.output_directory = f'{args.output_directory}/custom_trained_model'
+    os.makedirs(args.output_directory,exist_ok=True)
+    m_path = f'{args.output_directory}/{args.ontology}_lr_{args.lr}_{args.extra_layer}_{args.pad_len}.pt'
     print(f'Model path = {m_path}')
 
     start_training(
