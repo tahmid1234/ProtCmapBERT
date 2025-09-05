@@ -7,7 +7,7 @@ local_download_folder = "./all_models/ProtCmapBERT" # A folder in your current d
 # Make sure the folder exists
 os.makedirs(local_download_folder, exist_ok=True)
 
-# Download the mf.pt file to the specified folder
+# Download the model files to the specified folder
 mf_file_path = hf_hub_download(
     repo_id=repo_name,
     filename="dr_01_mf_lr_7e-06_cmap_bias_per_head_alpha_clipping_1_.pt",

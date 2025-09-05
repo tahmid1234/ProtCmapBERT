@@ -7,7 +7,7 @@ local_download_folder = "./evaluation_ds" # A folder in your current directory
 # Make sure the folder exists
 os.makedirs(local_download_folder, exist_ok=True)
 
-# Download the mf.pt file to the specified folder
+# Download GO Test File
 go_terms = hf_hub_download(
     repo_id=repo_name,
     filename="test_datatest_protein_data00.tfrecord",
@@ -28,7 +28,7 @@ go_terms = hf_hub_download(
     filename="test_datatest_protein_data03.tfrecord",
     local_dir=local_download_folder+"/go_test",
 )
-
+# Download EC Test File
 ec_number = hf_hub_download(
     repo_id=repo_name,
     filename="test_datatest_protein_data04.tfrecord",
