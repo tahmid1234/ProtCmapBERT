@@ -84,15 +84,14 @@ if __name__ == "__main__":
     parser.add_argument('--test_file_path', type=str, default="/mmfs1/projects/changhui.yan/mdtahmid.islam/ProtCmapBERT_Refined/ProtCmapBERT/evaluation_ds/seq_td_clean_go", help="File with test PDB chains.")
     parser.add_argument( '--extra_layer', type=str,default='cmap_bias' , choices=['cmap_bias','basic'], help="choose cmap_bias to use our model and basic to evaluate a finetuned model")
     parser.add_argument('--tokenizer_path', type=str, default=None,  help="tokenizer_path")
-    parser.add_argument('--output_dir',type=str, default="/mmfs1/projects/changhui.yan/mdtahmid.islam/ProtCmapBERT_Refined/ProtCmapBERT/evaluation/eval_results",help="Saving path for thr raw logits")
-    parser.add_argument('--pretrained_model_name', type=str, default='Rostlab/prot_bert',  help="Pretrained Model Name")
-    parser.add_argument('--drop_out_rate',type=float,default=0.01)    
+    parser.add_argument('--output_dir',type=str, default="evaluation/eval_results",help="Saving path for thr raw logits")
+    parser.add_argument('--pretrained_model_name', type=str, default='Rostlab/prot_bert',  help="Pretrained Model Name")  
     parser.add_argument('--m_path',type=str, default='./ProtCmapBERT/all_models/ProtCmapBERT/dr_01_mf_lr_7e-06_cmap_bias_per_head_alpha_clipping_1_.pt',help="model_path")
     parser.add_argument('--file_pattern',type=str, default='test_datatest_protein_data*.tfrecord',help = "tf file pattern")
-    
     parser.add_argument('--file_id',type = str,default = 1,help="  if gor the raw logit file")
     args = parser.parse_args()
     args.pad_len =  1002
+    args.drop_out_rate = 0.01
     print(args)
 
     

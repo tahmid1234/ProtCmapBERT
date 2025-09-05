@@ -1,3 +1,17 @@
+"""
+* This file provides the performance scores at different similarity percentages 
+  between the test set and the training set.
+
+* The `result_path` variable stores the path to the file that was generated 
+  during evaluation.
+
+* Before running the script, set the `ont` variable to one of the following choices:
+    - "mf"
+    - "bp"
+    - "cc"
+    - "ec"
+"""
+
 import pandas as pd
 import pickle
 import numpy as np
@@ -9,9 +23,9 @@ def load_and_filter_by_similarity( threshold='<30%',ont="ec",model="rs"):
     else:
         file_path_suffix = "nrPDB-GO_2019.06.18_test"
 
-    similarity_csv_path = f'/mmfs1/home/mdtahmid.islam/deepfri_bert/preprocessing/data/{file_path_suffix}.csv'
+    similarity_csv_path = f'data/{file_path_suffix}.csv'
     # Load the results
-    results_path = f'/mmfs1/home/mdtahmid.islam/deepfri_bert/evaluation/eval_results/{ont}_cmap_bias_per_head_alpha_no_cnn_finetuned_final_evaluation_results.pkl'
+    results_path = f'evaluation/eval_results/{ont}_cmap_bias_per_head_alpha_no_cnn_finetuned_final_evaluation_results.pkl'
     if model == 'rs':  
         print("RS model****")                                                                                         
         results_path = f'/mmfs1/home/mdtahmid.islam/deepfri_bert/evaluation/eval_results/{ont}_basic_prot_final_prot_results.pkl'
@@ -44,8 +58,8 @@ def load_and_filter_by_similarity( threshold='<30%',ont="ec",model="rs"):
     micro_aupr,macro_aupr = calculate_term_centric_aupr(final_labels,final_probs)
     print(f'model = {model} {ont}, at {threshold}, Fmax={fmax:.3f}, MACRO_AUPR={macro_aupr:.3f},  MICRO_AUPR={micro_aupr:.3f} ')
 
-o = 'cc'
-m = "rs"
+o = 'mf'
+m = "custom_prot_bert"
 load_and_filter_by_similarity(threshold='<30%',ont=o,model=m)
 load_and_filter_by_similarity(threshold='<40%',ont=o,model=m)
 load_and_filter_by_similarity(threshold='<50%',ont=o,model=m)

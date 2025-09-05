@@ -1,3 +1,28 @@
+"""
+* This script aligns GO terms between our model and the latest DeepFRI model 
+  to ensure a fair comparison.
+
+* Context:
+    - Our model was trained on a dataset with a slightly different set of GO terms.
+    - The latest DeepFRI model was trained on a dataset containing more GO terms.
+    - To compare fairly, we only consider the common terms present in both models.
+
+* Function: map_terms(label_name)
+    - Args:
+        label_name (str): One of {"mf", "ec", "bp", "cc"} indicating the ontology type.
+    - Process:
+        1. Loads GO terms from our model and the latest DeepFRI model parameter files.
+        2. Builds an index mapping from our model’s GO terms to their corresponding indices 
+           in the latest DeepFRI model (if they exist).
+        3. Marks missing terms (those not found in the latest DeepFRI model).
+    - Returns:
+        index_mapping (list[int | None]): Maps each of our model’s term indices to 
+                                          the latest DeepFRI model’s indices, or None if missing.
+        missing_terms (list[tuple[int, str]]): List of (index, term) pairs from our model 
+                                               that are not present in the latest DeepFRI model.
+"""
+
+
 import numpy as np
 import json
 import sys 
@@ -11,13 +36,8 @@ def map_terms(label_name):
                 'cc':'DeepFRI-MERGED_MultiGraphConv_3x512_fcd_1024_ca_10A_cellular_component_model_params.json'}
     old_model_json = keywords[label_name]
     new_model_json = f"DeepFRI-MERGED_GraphConv_gcd_512-512-512_fcd_1024_ca_10.0_{label_name}_model_params.json"
-    # if label_name == 'mf':
-    #         old_model_json = "DeepFRI-MERGED_MultiGraphConv_3x512_fcd_1024_ca_10A_molecular_function_model_params.json"
-    #         new_model_json = "DeepFRI-MERGED_GraphConv_gcd_512-512-512_fcd_1024_ca_10.0_mf_model_params.json"
-    # elif label_name == 'ec':
-    #         old_model_json = "DeepFRI-MERGED_MultiGraphConv_3x512_fcd_1024_ca_10A_enzyme_commission_model_params.json"
-    #         new_model_json = "DeepFRI-MERGED_GraphConv_gcd_512-512-512_fcd_1024_ca_10.0_ec_model_params.json"
-    file_path = '/mmfs1/projects/changhui.yan/mdtahmid.islam/ProtCmapBERT_Refined/ProtCmapBERT/data'
+
+    file_path = './data'
     with open(f'{file_path}/{new_model_json}') as f1, open(f'{file_path}/{old_model_json}') as f2:
         latest_go_terms = json.load(f1)[looking_for]   # 989 terms
         old_go_terms = json.load(f2)[looking_for]      # 489 terms
